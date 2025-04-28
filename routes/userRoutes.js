@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import {signUp,login,createUser,getAllUsers,updateUser,deleteUser,getUserById,assignPackageToUsers,assignWorkspaceToUsers} from '../controllers/userController.js';
+import {signUp,login,createUser,getAllUsers,updateUser,deleteUser,getUserById,assignPackageToUsers,assignWorkspaceToUsers, activeDesactiveUser, logout} from '../controllers/userController.js';
 import { authenticateUser } from '../middlewares/verifyToken.js';
 import { checkRole } from '../middlewares/checkRole.js';
 
@@ -76,6 +76,48 @@ router.post('/signup', signUp);
  *         description: Échec de l'authentification.
  */
 router.post('/login', login);
+
+/**
+ * @swagger
+ * /api/v1/users/logout:
+ *   post:
+ *     tags:
+ *       - Auth
+ *     summary: Déconnexion de l'utilisateur.
+ *     description: Cette route permet à un utilisateur de se déconnecter.
+ *     responses:
+ *       200:
+ *         description: Déconnexion réussie.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "You are logged out successfully"
+ *       400:
+ *         description: Erreur lors de la déconnexion.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Error message"
+ *       500:
+ *         description: Erreur serveur.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Internal server error"
+ */
+router.post('/logout', authenticateUser, logout);
 
 router.use(authenticateUser);
 
@@ -240,6 +282,31 @@ router.put('/:id',checkRole(['super_admin', 'admin']), updateUser);
  *         description: Utilisateur non trouvé.
  */
 router.delete('/:id', checkRole(['super_admin', 'admin']), deleteUser);
+
+/**
+ * @swagger
+ * /api/v1/users/activeDesactiveUser/{id}:
+ *   patch:
+ *     tags:
+ *       - Users
+ *     summary: Activer ou désactiver un utilisateur.
+ *     description: Cette route permet d'activer ou de désactiver un utilisateur en fonction de son état actuel.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID de l'utilisateur à activer ou désactiver.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Succès de l'activation ou désactivation de l'utilisateur.
+ *       400:
+ *         description: Erreur dans la requête.
+ *       500:
+ *         description: Erreur serveur.
+ */
+router.patch('/activeDesactiveUser/:id', checkRole(['super_admin', 'admin']), activeDesactiveUser);
 
 /**
  * @swagger
