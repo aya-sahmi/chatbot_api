@@ -1,3 +1,4 @@
+import { createServer } from 'http';
 import express from 'express';
 import userRoutes from './routes/userRoutes.js';
 import packageRoutes from './routes/packageRoutes.js';
@@ -10,9 +11,6 @@ import { swaggerDocs, swaggerUi } from './config/swagger.js';
 const app = express();
 
 app.use(express.json());
-const PORT = process.env.PORT ;
-
-app.use(express.json());
 
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
@@ -21,8 +19,10 @@ app.use('/api/v1/packages', packageRoutes);
 app.use('/api/v1/domaines', domaineRoutes);
 app.use('/api/v1/workspaces', workspaceRoutes);
 app.use('/api/v1/chatbots', chatbotRoutes);
-app.use('/api/v1/roles',roleRoutes)
+app.use('/api/v1/roles', roleRoutes);
+const server = createServer(app);
 
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running`);
-});
+// Exporter la fonction handler pour Vercel
+export default function handler(req, res) {
+    server.emit('request', req, res);
+}
