@@ -2,6 +2,7 @@ import Router from "express";
 import {createDomaine,getAllDomaines,getDomaineById,updateDomaine,deleteDomaine,assignSoldeToWorkspaces} from "../controllers/domaineController.js";
 import { checkRole } from "../middlewares/checkRole.js";
 import { authenticateUser } from "../middlewares/verifyToken.js";
+import { checkPermission } from "../middlewares/checkPermission.js";
 
 const router = Router();
 
@@ -44,7 +45,7 @@ router.use(authenticateUser);
  *       400:
  *         description: Demande invalide.
  */
-router.post('/', checkRole(['super_admin', 'admin']), createDomaine);
+router.post('/', checkPermission('createDomaine'), createDomaine);
 
 /**
  * @swagger
@@ -58,7 +59,7 @@ router.post('/', checkRole(['super_admin', 'admin']), createDomaine);
  *       200:
  *         description: Liste des domaines récupérée avec succès.
  */
-router.get('/', checkRole(['super_admin', 'admin']), getAllDomaines);
+router.get('/', checkPermission('getAllDomaines'), getAllDomaines);
 
 /**
  * @swagger
@@ -81,7 +82,7 @@ router.get('/', checkRole(['super_admin', 'admin']), getAllDomaines);
  *       404:
  *         description: Domaine non trouvé.
  */
-router.get('/:id',checkRole(['super_admin', 'admin','user']), getDomaineById);
+router.get('/:id',checkPermission('getDomaineById'), getDomaineById);
 
 /**
  * @swagger
@@ -122,7 +123,7 @@ router.get('/:id',checkRole(['super_admin', 'admin','user']), getDomaineById);
  *       400:
  *         description: Demande invalide.
  */
-router.put('/:id',checkRole(['super_admin', 'admin']), updateDomaine);
+router.put('/:id',checkPermission('updateDomaine'), updateDomaine);
 
 /**
  * @swagger
@@ -145,7 +146,7 @@ router.put('/:id',checkRole(['super_admin', 'admin']), updateDomaine);
  *       404:
  *         description: Domaine non trouvé.
  */
-router.delete('/:id',checkRole(['super_admin', 'admin']), deleteDomaine);
+router.delete('/:id',checkPermission('deleteDomaine'), deleteDomaine);
 
 /**
  * @swagger
@@ -181,6 +182,6 @@ router.delete('/:id',checkRole(['super_admin', 'admin']), deleteDomaine);
  *       500:
  *         description: Erreur interne du serveur.
  */
-router.post('/assign-solde-to-workspaces', checkRole, assignSoldeToWorkspaces);
+router.post('/assign-solde-to-workspaces', checkPermission('assignSoldeToWorkspaces'), assignSoldeToWorkspaces);
 
 export default router;

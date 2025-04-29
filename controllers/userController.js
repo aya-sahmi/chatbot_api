@@ -221,4 +221,23 @@ const assignWorkspaceToUsers = async (req, res) => {
     }
 }
 
-export {signUp , login , logout ,createUser, getAllUsers, getUserById, updateUser, deleteUser , assignPackageToUsers , assignDomaineToUsers , assignWorkspaceToUsers,activeDesactiveUser};
+const assignRoleToUsers = async (req, res) => {
+    try {
+        const { userId, roleId } = req.body;
+        if (!userId || !roleId) {
+            return res.status(400).json({ error: "userId and roleId are required." });
+        }
+        const { data, error } = await supabase.from('users').update({ role_id: roleId }).eq('user_id', userId).select('*');
+        if (error) {
+            return res.status(400).json({ error: error.message });
+        }
+        res.status(200).json({
+            message: "Role assignment completed successfully.",
+            updatedUser: data,
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
+export {signUp , login , logout ,createUser, getAllUsers, getUserById, updateUser, deleteUser , assignPackageToUsers , assignDomaineToUsers , assignWorkspaceToUsers,activeDesactiveUser , assignRoleToUsers};

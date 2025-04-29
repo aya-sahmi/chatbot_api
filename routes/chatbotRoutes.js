@@ -2,6 +2,7 @@ import { Router } from "express";
 import {createChatbot,getAllChatbots,getChatbotById,updateChatbot,deleteChatbot,assignChatbotToWorkspace} from "../controllers/chatbotController.js";
 import { checkRole } from "../middlewares/checkRole.js";
 import { authenticateUser } from "../middlewares/verifyToken.js";
+import { checkPermission } from "../middlewares/checkPermission.js";
 
 const router = Router();
 
@@ -26,7 +27,7 @@ router.use(authenticateUser);
  *       200:
  *         description: Liste des chatbots récupérée avec succès.
  */
-router.get('/', checkRole(['super_admin', 'admin','live_agent','user']), getAllChatbots);
+router.get('/', checkPermission('getAllChatbots'), getAllChatbots);
 
 /**
  * @swagger
@@ -64,7 +65,7 @@ router.get('/', checkRole(['super_admin', 'admin','live_agent','user']), getAllC
  *       400:
  *         description: Demande invalide.
  */
-router.post('/',checkRole(['super_admin', 'admin','live_agent']), createChatbot);
+router.post('/',checkPermission('createChatbot'), createChatbot);
 
 /**
  * @swagger
@@ -87,7 +88,7 @@ router.post('/',checkRole(['super_admin', 'admin','live_agent']), createChatbot)
  *       404:
  *         description: Chatbot non trouvé.
  */
-router.get('/:id',checkRole(['super_admin', 'admin','live_agent']), getChatbotById);
+router.get('/:id',checkPermission('getChatbotById'), getChatbotById);
 
 /**
  * @swagger
@@ -132,7 +133,7 @@ router.get('/:id',checkRole(['super_admin', 'admin','live_agent']), getChatbotBy
  *       404:
  *         description: Chatbot non trouvé.
  */
-router.put('/:id', checkRole(['super_admin', 'admin','live_agent']), updateChatbot);
+router.put('/:id', checkPermission('updateChatbot'), updateChatbot);
 
 /**
  * @swagger
@@ -155,7 +156,7 @@ router.put('/:id', checkRole(['super_admin', 'admin','live_agent']), updateChatb
  *       404:
  *         description: Chatbot non trouvé.
  */
-router.delete('/:id', checkRole(['super_admin', 'admin','live_agent']), deleteChatbot);
+router.delete('/:id', checkPermission('deleteChatbot'), deleteChatbot);
 
 /**
  * @swagger
@@ -182,6 +183,6 @@ router.delete('/:id', checkRole(['super_admin', 'admin','live_agent']), deleteCh
  *       200:
  *         description: Chatbot assigné avec succès à l'workspace.
  */
-router.post('/assigntoworkspace', checkRole(['super_admin', 'admin']), assignChatbotToWorkspace);
+router.post('/assigntoworkspace', checkPermission('assignChatbotToWorkspace'), assignChatbotToWorkspace);
 
 export default router;

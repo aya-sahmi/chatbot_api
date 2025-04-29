@@ -2,6 +2,7 @@ import { Router } from "express";
 import {createWorkspace,getAllWorkspaces,getWorkspaceById,updateWorkspace,deleteWorkspace,assignDomainToWorkspaces} from "../controllers/workspaceController.js";
 import { checkRole } from "../middlewares/checkRole.js";
 import { authenticateUser } from "../middlewares/verifyToken.js";
+import { checkPermission } from "../middlewares/checkPermission.js";
 
 const router = Router();
 
@@ -44,7 +45,7 @@ router.use(authenticateUser);
  *       400:
  *         description: Demande invalide.
  */
-router.post('/', checkRole(['super_admin', 'admin']), createWorkspace);
+router.post('/', checkPermission('createWorkspace'), createWorkspace);
 
 /**
  * @swagger
@@ -58,7 +59,7 @@ router.post('/', checkRole(['super_admin', 'admin']), createWorkspace);
  *       200:
  *         description: Liste des workspaces récupérée avec succès.
  */
-router.get('/',checkRole(['super_admin', 'admin','user']), getAllWorkspaces);
+router.get('/',checkPermission('getAllWorkspaces'), getAllWorkspaces);
 
 /**
  * @swagger
@@ -81,7 +82,7 @@ router.get('/',checkRole(['super_admin', 'admin','user']), getAllWorkspaces);
  *       404:
  *         description: workspace non trouvé.
  */
-router.get('/:id',checkRole(['super_admin', 'admin','user']), getWorkspaceById);
+router.get('/:id',checkPermission('getWorkspaceById'), getWorkspaceById);
 
 /**
  * @swagger
@@ -120,7 +121,7 @@ router.get('/:id',checkRole(['super_admin', 'admin','user']), getWorkspaceById);
  *       404:
  *         description: workspace non trouvé.
  */
-router.put('/:id',checkRole(['super_admin', 'admin']), updateWorkspace);
+router.put('/:id',checkPermission('updateWorkspace'), updateWorkspace);
 
 /**
  * @swagger
@@ -143,7 +144,7 @@ router.put('/:id',checkRole(['super_admin', 'admin']), updateWorkspace);
  *       404:
  *         description: workspace non trouvé.
  */
-router.delete('/:id',checkRole(['super_admin', 'admin']), deleteWorkspace);
+router.delete('/:id',checkPermission('deleteWorkspace'), deleteWorkspace);
 
 /**
  * @swagger
@@ -172,6 +173,6 @@ router.delete('/:id',checkRole(['super_admin', 'admin']), deleteWorkspace);
  *       200:
  *         description: Domaine assigné avec succès à l'workspace.
  */
-router.post('/assignDomainToWorkspaces',checkRole(['super_admin', 'admin']), assignDomainToWorkspaces);
+router.post('/assignDomainToWorkspaces',checkPermission('assignDomainToWorkspaces'), assignDomainToWorkspaces);
 
 export default router;

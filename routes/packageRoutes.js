@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {createPackage,getAllPackages,getPackageById,updatePackage,deletePackage} from '../controllers/packageController.js';
 import { checkRole } from '../middlewares/checkRole.js';
 import { authenticateUser } from '../middlewares/verifyToken.js';
+import { checkPermission } from '../middlewares/checkPermission.js';
 
 const router = Router();
 
@@ -53,7 +54,7 @@ router.use(authenticateUser);
  *       400:
  *         description: Demande invalide.
  */
-router.post('/',checkRole(['super_admin', 'admin']), createPackage);
+router.post('/',checkPermission('createPackage'), createPackage);
 
 /**
  * @swagger
@@ -67,7 +68,7 @@ router.post('/',checkRole(['super_admin', 'admin']), createPackage);
  *       200:
  *         description: Liste des packages récupérée avec succès.
  */
-router.get('/',checkRole(['super_admin', 'admin','user']), getAllPackages);
+router.get('/',checkPermission('getAllPackages'), getAllPackages);
 
 /**
  * @swagger
@@ -90,7 +91,7 @@ router.get('/',checkRole(['super_admin', 'admin','user']), getAllPackages);
  *       404:
  *         description: package non trouvé.
  */
-router.get('/:id', checkRole(['super_admin', 'admin']), getPackageById);
+router.get('/:id', checkPermission('getPackageById'), getPackageById);
 
 /**
  * @swagger
@@ -138,7 +139,7 @@ router.get('/:id', checkRole(['super_admin', 'admin']), getPackageById);
  *       404:
  *         description: package non trouvé.
  */
-router.put('/:id',checkRole(['super_admin', 'admin']), updatePackage);
+router.put('/:id',checkPermission('updatePackage'), updatePackage);
 
 /**
  * @swagger
@@ -161,6 +162,6 @@ router.put('/:id',checkRole(['super_admin', 'admin']), updatePackage);
  *       404:
  *         description: package non trouvé.
  */
-router.delete('/:id',checkRole(['super_admin', 'admin']), deletePackage);
+router.delete('/:id',checkPermission('deletePackage'), deletePackage);
 
 export default router;

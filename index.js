@@ -4,6 +4,7 @@ import packageRoutes from './routes/packageRoutes.js';
 import domaineRoutes from './routes/domaineRoutes.js';
 import workspaceRoutes from './routes/workspaceRoutes.js';
 import chatbotRoutes from './routes/chatbotRoutes.js';
+import roleRoutes from './routes/roleRoutes.js';
 import { swaggerDocs, swaggerUi } from './config/swagger.js';
 
 const app = express();
@@ -20,6 +21,7 @@ app.use('/api/v1/packages', packageRoutes);
 app.use('/api/v1/domaines', domaineRoutes);
 app.use('/api/v1/workspaces', workspaceRoutes);
 app.use('/api/v1/chatbots', chatbotRoutes);
+app.use('/api/v1/roles',roleRoutes)
 
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running`);

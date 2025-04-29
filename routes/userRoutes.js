@@ -1,7 +1,8 @@
 import { Router } from 'express';
-import {signUp,login,createUser,getAllUsers,updateUser,deleteUser,getUserById,assignPackageToUsers,assignWorkspaceToUsers, activeDesactiveUser, logout} from '../controllers/userController.js';
+import {signUp,login,createUser,getAllUsers,updateUser,deleteUser,getUserById,assignPackageToUsers,assignWorkspaceToUsers, activeDesactiveUser, logout, assignRoleToUsers} from '../controllers/userController.js';
 import { authenticateUser } from '../middlewares/verifyToken.js';
 import { checkRole } from '../middlewares/checkRole.js';
+import { checkPermission } from '../middlewares/checkPermission.js';
 
 const router = Router();
 
@@ -167,7 +168,7 @@ router.use(authenticateUser);
  *       201:
  *         description: Utilisateur créé avec succès.
  */
-router.post('/', checkRole(['super_admin', 'admin']), createUser);
+router.post('/', checkPermission('createUser'), createUser);
 
 /**
  * @swagger
@@ -181,7 +182,7 @@ router.post('/', checkRole(['super_admin', 'admin']), createUser);
  *       200:
  *         description: Liste des utilisateurs récupérée avec succès.
  */
-router.get('/', checkRole(['super_admin','admin']), getAllUsers);
+router.get('/', checkPermission('getAllUsers'), getAllUsers);
 
 /**
  * @swagger
@@ -204,7 +205,7 @@ router.get('/', checkRole(['super_admin','admin']), getAllUsers);
  *       404:
  *         description: Utilisateur non trouvé.
  */
-router.get('/:id', checkRole(['super_admin', 'admin']), getUserById);
+router.get('/:id', checkPermission('getUserById'), getUserById);
 
 /**
  * @swagger
@@ -258,7 +259,7 @@ router.get('/:id', checkRole(['super_admin', 'admin']), getUserById);
  *       404:
  *         description: Utilisateur non trouvé.
  */
-router.put('/:id',checkRole(['super_admin', 'admin']), updateUser);
+router.put('/:id',checkPermission(updateUser), updateUser);
 
 /**
  * @swagger
@@ -281,7 +282,7 @@ router.put('/:id',checkRole(['super_admin', 'admin']), updateUser);
  *       404:
  *         description: Utilisateur non trouvé.
  */
-router.delete('/:id', checkRole(['super_admin', 'admin']), deleteUser);
+router.delete('/:id', checkPermission('deleteUser'), deleteUser);
 
 /**
  * @swagger
@@ -306,7 +307,7 @@ router.delete('/:id', checkRole(['super_admin', 'admin']), deleteUser);
  *       500:
  *         description: Erreur serveur.
  */
-router.patch('/activeDesactiveUser/:id', checkRole(['super_admin', 'admin']), activeDesactiveUser);
+router.patch('/activeDesactiveUser/:id', checkPermission('activeDesactiveUser'), activeDesactiveUser);
 
 /**
  * @swagger
@@ -335,7 +336,7 @@ router.patch('/activeDesactiveUser/:id', checkRole(['super_admin', 'admin']), ac
  *       200:
  *         description: Package assigné avec succès.
  */
-router.post('/assignPackageToUsers', checkRole(['super_admin', 'admin']), assignPackageToUsers);
+router.post('/assignPackageToUsers', checkPermission('assignPackageToUsers'), assignPackageToUsers);
 
 /**
  * @swagger
@@ -364,6 +365,56 @@ router.post('/assignPackageToUsers', checkRole(['super_admin', 'admin']), assign
  *       200:
  *         description: Workspace assigné avec succès.
  */
-router.post('/assignworkspacetouser', checkRole(['super_admin', 'admin']), assignWorkspaceToUsers);
+router.post('/assignworkspacetouser', checkPermission('assignWorkspaceToUsers'), assignWorkspaceToUsers);
+
+/**
+ * @swagger
+ * /api/v1/users/assignRole:
+ *   post:
+ *     tags:
+ *       - Users
+ *     summary: Assigner un rôle à un utilisateur.
+ *     description: Cette route permet d'assigner un rôle à un utilisateur spécifique.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 example: "user1"
+ *               roleId:
+ *                 type: string
+ *                 example: "7b4a7d6b-8903-4ecd-90ea-dc5a407255e6"
+ *     responses:
+ *       200:
+ *         description: Rôle assigné avec succès.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Role assigned to user successfully"
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: "user1"
+ *                     role_id:
+ *                       type: string
+ *                       example: "7b4a7d6b-8903-4ecd-90ea-dc5a407255e6"
+ *       404:
+ *         description: Rôle ou utilisateur non trouvé.
+ *       400:
+ *         description: Erreur dans la requête.
+ *       500:
+ *         description: Erreur serveur.
+ */
+router.post('/assignRole' , checkPermission('assignRoleToUsers') , assignRoleToUsers);
 
 export default router;
