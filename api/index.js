@@ -1,12 +1,12 @@
 import { createServer } from 'http';
 import express from 'express';
-import userRoutes from './routes/userRoutes.js';
-import packageRoutes from './routes/packageRoutes.js';
-import domaineRoutes from './routes/domaineRoutes.js';
-import workspaceRoutes from './routes/workspaceRoutes.js';
-import chatbotRoutes from './routes/chatbotRoutes.js';
-import roleRoutes from './routes/roleRoutes.js';
-import { swaggerDocs, swaggerUi } from './config/swagger.js';
+import userRoutes from '../routes/userRoutes.js';
+import packageRoutes from '../routes/packageRoutes.js';
+import domaineRoutes from '../routes/domaineRoutes.js';
+import workspaceRoutes from '../routes/workspaceRoutes.js';
+import chatbotRoutes from '../routes/chatbotRoutes.js';
+import roleRoutes from '../routes/roleRoutes.js';
+import { swaggerDocs, swaggerUi } from '../config/swagger.js';
 
 const app = express();
 
