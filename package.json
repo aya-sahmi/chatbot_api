@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "npm install --omit=dev",
     "dev": "nodemon index.js",
     "start": "node index.js",
     "install:prod": "npm install --omit=dev"
