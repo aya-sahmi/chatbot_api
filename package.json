@@ -4,10 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "npm install --omit=dev",
     "dev": "nodemon index.js",
-    "start": "node index.js",
-    "install:prod": "npm install --omit=dev"
+    "start": "node index.js"
   },
   "engines": {
     "node": "20.x"
@@ -19,6 +17,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.49.4",
     "axios": "^1.8.4",
+    "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "nodemon": "^3.1.9",
