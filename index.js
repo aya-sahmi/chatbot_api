@@ -7,10 +7,16 @@ import workspaceRoutes from './routes/workspaceRoutes.js';
 import chatbotRoutes from './routes/chatbotRoutes.js';
 import roleRoutes from './routes/roleRoutes.js';
 import { swaggerDocs, swaggerUi } from './config/swagger.js';
-
+import cors from 'cors';
 
 const app = express();
-
+const corsOptions = {
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'PATCH' ,'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  };
+app.use(cors(corsOptions));
 app.use(express.json());
 const PORT = process.env.PORT ;
 
