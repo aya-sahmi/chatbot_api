@@ -10,7 +10,7 @@ const swag = {
             description: 'Documentation de l\'API du projet',
         },
         servers: [{
-                url: 'http://localhost:5000',
+                url: 'http://localhost:5000/api/v1',
             },
             {
                 url: 'https://d30e6c47-601f-4639-85d1-4f2aa05d5e11-00-17cyw139my6yf.kirk.replit.dev/'

@@ -1,4 +1,5 @@
 import express from 'express';
+import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import packageRoutes from './routes/packageRoutes.js';
 import domaineRoutes from './routes/domaineRoutes.js';
@@ -17,6 +18,7 @@ app.use(express.json());
 
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
+app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/packages', packageRoutes);
 app.use('/api/v1/domaines', domaineRoutes);

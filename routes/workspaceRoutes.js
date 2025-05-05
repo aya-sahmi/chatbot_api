@@ -1,6 +1,5 @@
 import { Router } from "express";
-import {createWorkspace,getAllWorkspaces,getWorkspaceById,updateWorkspace,deleteWorkspace,assignDomainToWorkspaces} from "../controllers/workspaceController.js";
-import { checkRole } from "../middlewares/checkRole.js";
+import {createWorkspace,getAllWorkspaces,getWorkspaceById,updateWorkspace,deleteWorkspace,assignDomainToWorkspaces, activeDesactiveWorkspace} from "../controllers/workspaceController.js";
 import { authenticateUser } from "../middlewares/verifyToken.js";
 import { checkPermission } from "../middlewares/checkPermission.js";
 
@@ -17,7 +16,7 @@ router.use(authenticateUser);
 
 /**
  * @swagger
- * /api/v1/workspaces/:
+ * /workspaces/:
  *   post:
  *     tags:
  *       - Workspaces
@@ -49,7 +48,7 @@ router.post('/', checkPermission('createWorkspace'), createWorkspace);
 
 /**
  * @swagger
- * /api/v1/workspaces/:
+ * /workspaces/:
  *   get:
  *     tags:
  *       - Workspaces
@@ -63,7 +62,7 @@ router.get('/',checkPermission('getAllWorkspaces'), getAllWorkspaces);
 
 /**
  * @swagger
- * /api/v1/workspaces/{id}:
+ * /workspaces/{id}:
  *   get:
  *     tags:
  *       - Workspaces
@@ -86,7 +85,7 @@ router.get('/:id',checkPermission('getWorkspaceById'), getWorkspaceById);
 
 /**
  * @swagger
- * /api/v1/workspaces/{id}:
+ * /workspaces/{id}:
  *   put:
  *     tags:
  *       - Workspaces
@@ -125,7 +124,7 @@ router.put('/:id',checkPermission('updateWorkspace'), updateWorkspace);
 
 /**
  * @swagger
- * /api/v1/workspaces/{id}:
+ * /workspaces/{id}:
  *   delete:
  *     tags:
  *       - Workspaces
@@ -148,7 +147,69 @@ router.delete('/:id',checkPermission('deleteWorkspace'), deleteWorkspace);
 
 /**
  * @swagger
- * /api/v1/workspaces/assignDomainToWorkspaces:
+ * /workspaces/active-desactive/{id}:
+ *   patch:
+ *     tags:
+ *       - Workspaces
+ *     summary: Activer ou désactiver un workspace.
+ *     description: Cette route permet de basculer le statut `is_active` d'un workspace entre `true` et `false`. Nécessite un rôle approprié.
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: L'ID du workspace à activer ou désactiver.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Statut du workspace mis à jour avec succès.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Workspace was activated successfully."
+ *                 updateActivation:
+ *                   type: object
+ *                   description: Les détails du workspace mis à jour.
+ *       400:
+ *         description: Requête invalide.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Invalid request."
+ *       404:
+ *         description: Workspace non trouvé.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Workspace not found."
+ *       500:
+ *         description: Erreur interne du serveur.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Internal server error."
+ */
+router.patch('/active-desactive/:id', checkPermission('activeDesactiveWorkspace'), activeDesactiveWorkspace);
+
+/**
+ * @swagger
+ * /workspaces/assignDomainToWorkspaces:
  *   post:
  *     tags:
  *       - Workspaces

@@ -67,15 +67,43 @@ const updateWorkspace = async (req, res) => {
 const deleteWorkspace = async (req, res) => {
     try {
         const id = req.params.id;
-        const {data , error} = await supabase.from("workspaces").delete().eq("workspace_id",id);
+        const {data , error} = await supabase.from("workspaces").update({is_deleted:true}).eq("workspace_id",id).select('*');
         if(error){
             return res.status(400).json({error: error.message})
         }
-        res.json(data);
+        res.json({
+            message: "Workspace marked as deleted successfully",
+            data
+        });
     } catch (error) {
         res.status(500).json({error: error.message})
     }
 }
+
+const activeDesactiveWorkspace = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const { data, error } = await supabase.from('workspaces').select('is_active').eq('workspace_id', id).single();
+        if (error) {
+            return res.status(400).json({ error: error.message });
+        }
+        if (data.is_active === true) {
+            const { data: updateActivation, error: err } = await supabase.from('workspaces').update({ is_active: false }).eq('workspace_id', id).select('*');
+            if (err) {
+                return res.status(400).json({ error: err.message });
+            }
+            res.status(200).json({message: 'Workspace was deactivated successfully',updateActivation});
+        } else {
+            const { data: updateActivation, error: err } = await supabase.from('workspaces').update({ is_active: true }).eq('workspace_id', id).select('*');
+            if (err) {
+                return res.status(400).json({ error: err.message });
+            }
+            res.status(200).json({message: 'Workspace was activated successfully',updateActivation});
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 const assignDomainToWorkspaces = async (req,res)=>{
     try{
@@ -109,4 +137,4 @@ const assignDomainToWorkspaces = async (req,res)=>{
         res.status(500).json({error: error.message})
     }
 }
-export {createWorkspace, getAllWorkspaces, getWorkspaceById, updateWorkspace, deleteWorkspace , assignDomainToWorkspaces}
+export {createWorkspace, getAllWorkspaces, getWorkspaceById, updateWorkspace, deleteWorkspace , activeDesactiveWorkspace , assignDomainToWorkspaces}

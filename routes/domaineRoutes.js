@@ -1,6 +1,5 @@
 import Router from "express";
-import {createDomaine,getAllDomaines,getDomaineById,updateDomaine,deleteDomaine,assignSoldeToWorkspaces} from "../controllers/domaineController.js";
-import { checkRole } from "../middlewares/checkRole.js";
+import {createDomaine,getAllDomaines,getDomaineById,updateDomaine,deleteDomaine,assignSoldeToWorkspaces , activeDesactiveDomaine} from "../controllers/domaineController.js";
 import { authenticateUser } from "../middlewares/verifyToken.js";
 import { checkPermission } from "../middlewares/checkPermission.js";
 
@@ -17,7 +16,7 @@ router.use(authenticateUser);
 
 /**
  * @swagger
- * /api/v1/domaines/:
+ * /domaines/:
  *   post:
  *     tags:
  *       - Domaines
@@ -49,7 +48,7 @@ router.post('/', checkPermission('createDomaine'), createDomaine);
 
 /**
  * @swagger
- * /api/v1/domaines/:
+ * /domaines/:
  *   get:
  *     tags:
  *       - Domaines
@@ -63,7 +62,7 @@ router.get('/', checkPermission('getAllDomaines'), getAllDomaines);
 
 /**
  * @swagger
- * /api/v1/domaines/{id}:
+ * /domaines/{id}:
  *   get:
  *     tags:
  *       - Domaines
@@ -86,7 +85,7 @@ router.get('/:id',checkPermission('getDomaineById'), getDomaineById);
 
 /**
  * @swagger
- * /api/v1/domaines/{id}:
+ * /domaines/{id}:
  *   put:
  *     tags:
  *       - Domaines
@@ -127,7 +126,7 @@ router.put('/:id',checkPermission('updateDomaine'), updateDomaine);
 
 /**
  * @swagger
- * /api/v1/domaines/{id}:
+ * /domaines/{id}:
  *   delete:
  *     tags:
  *       - Domaines
@@ -150,7 +149,69 @@ router.delete('/:id',checkPermission('deleteDomaine'), deleteDomaine);
 
 /**
  * @swagger
- * /api/v1/domaines/assign-solde-to-workspaces:
+ * /domaines/active-desactive/{id}:
+ *   patch:
+ *     tags:
+ *       - Domaines
+ *     summary: Activer ou désactiver un domaine.
+ *     description: Cette route permet de basculer le statut `is_active` d'un domaine entre `true` et `false`. Nécessite un rôle approprié.
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: L'ID du domaine à activer ou désactiver.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Statut du domaine mis à jour avec succès.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Domaine was activated successfully."
+ *                 updateActivation:
+ *                   type: object
+ *                   description: Les détails du domaine mis à jour.
+ *       400:
+ *         description: Requête invalide.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Invalid request."
+ *       404:
+ *         description: Domaine non trouvé.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Domaine not found."
+ *       500:
+ *         description: Erreur interne du serveur.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Internal server error."
+ */
+router.patch('/active-desactive/:id', checkPermission('activeDesactiveDomaine'), activeDesactiveDomaine);
+
+/**
+ * @swagger
+ * /domaines/assign-solde-to-workspaces:
  *   post:
  *     tags:
  *       - Domaines

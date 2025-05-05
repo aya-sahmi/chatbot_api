@@ -1,6 +1,5 @@
 import { Router } from "express";
-import {createChatbot,getAllChatbots,getChatbotById,updateChatbot,deleteChatbot,assignChatbotToWorkspace} from "../controllers/chatbotController.js";
-import { checkRole } from "../middlewares/checkRole.js";
+import {createChatbot,getAllChatbots,getChatbotById,updateChatbot,deleteChatbot,assignChatbotToWorkspace, activeDesactiveChatbot} from "../controllers/chatbotController.js";
 import { authenticateUser } from "../middlewares/verifyToken.js";
 import { checkPermission } from "../middlewares/checkPermission.js";
 
@@ -17,7 +16,7 @@ router.use(authenticateUser);
 
 /**
  * @swagger
- * /api/v1/chatbots/:
+ * /chatbots/:
  *   get:
  *     tags:
  *      - Chatbot
@@ -31,7 +30,7 @@ router.get('/', checkPermission('getAllChatbots'), getAllChatbots);
 
 /**
  * @swagger
- * /api/v1/chatbots/:
+ * /chatbots/:
  *   post:
  *     tags:
  *      - Chatbot
@@ -69,7 +68,7 @@ router.post('/',checkPermission('createChatbot'), createChatbot);
 
 /**
  * @swagger
- * /api/v1/chatbots/{id}:
+ * /chatbots/{id}:
  *   get:
  *     tags:
  *      - Chatbot
@@ -92,7 +91,7 @@ router.get('/:id',checkPermission('getChatbotById'), getChatbotById);
 
 /**
  * @swagger
- * /api/v1/chatbots/{id}:
+ * /chatbots/{id}:
  *   put:
  *     tags:
  *       - Chatbot
@@ -137,7 +136,7 @@ router.put('/:id', checkPermission('updateChatbot'), updateChatbot);
 
 /**
  * @swagger
- * /api/v1/chatbots/{id}:
+ * /chatbots/{id}:
  *   delete:
  *     tags:
  *      - Chatbot
@@ -160,7 +159,69 @@ router.delete('/:id', checkPermission('deleteChatbot'), deleteChatbot);
 
 /**
  * @swagger
- * /api/v1/chatbots/assigntoworkspace:
+ * /chatbots/active-desactive/{id}:
+ *   patch:
+ *     tags:
+ *       - Chatbot
+ *     summary: Activer ou désactiver un chatbot.
+ *     description: Cette route permet de basculer le statut `is_active` d'un chatbot entre `true` et `false`. Nécessite un rôle approprié.
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: L'ID du chatbot à activer ou désactiver.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Statut du chatbot mis à jour avec succès.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Chatbot was activated successfully."
+ *                 updateActivation:
+ *                   type: object
+ *                   description: Les détails du chatbot mis à jour.
+ *       400:
+ *         description: Requête invalide.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Invalid request."
+ *       404:
+ *         description: Chatbot non trouvé.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Chatbot not found."
+ *       500:
+ *         description: Erreur interne du serveur.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Internal server error."
+ */
+router.patch('/active-desactive/:id', checkPermission('activeDesactiveChatbot'), activeDesactiveChatbot);
+
+/**
+ * @swagger
+ * /chatbots/assigntoworkspace:
  *   post:
  *     tags:
  *      - Chatbot

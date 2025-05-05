@@ -1,222 +1,15 @@
 import { Router } from 'express';
-import {signUp,login,createUser,getAllUsers,updateUser,deleteUser,getUserById,assignPackageToUsers,assignWorkspaceToUsers, activeDesactiveUser, logout, assignRoleToUsers, forgotPassword, resetPassword} from '../controllers/userController.js';
+import {createUser,getAllUsers,updateUser,deleteUser,getUserById,assignPackageToUsers,assignWorkspaceToUsers, activeDesactiveUser, assignRoleToUsers, assignDomaineToUsers} from '../controllers/userController.js';
 import { authenticateUser } from '../middlewares/verifyToken.js';
-import { checkRole } from '../middlewares/checkRole.js';
 import { checkPermission } from '../middlewares/checkPermission.js';
 
 const router = Router();
-
-/**
- * @swagger
- * tags:
- *   - name: Users
- *     description: API for managing users
- */
-
-/**
- * @swagger
- * tags:
- *   - name: Auth
- *     description: API for managing authentication
- */
-
-/**
- * @swagger
- * /api/v1/users/signup:
- *   post:
- *     tags:
- *       - Auth
- *     summary: Créer un nouvel utilisateur.
- *     description: Cette route permet à un nouvel utilisateur de s'inscrire.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 example: "newuser@gmail.com"
- *               password:
- *                 type: string
- *                 example: "1234"
- *     responses:
- *       201:
- *         description: Utilisateur créé avec succès.
- *       400:
- *         description: Demande invalide.
- */
-router.post('/signup', signUp);
-
-/**
- * @swagger
- * /api/v1/users/login:
- *   post:
- *     tags:
- *       - Auth
- *     summary: Authentifier un utilisateur.
- *     description: Cette route permet à un utilisateur de se connecter.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 example: "ayasahmi@gmail.com"
- *               password:
- *                 type: string
- *                 example: "123456"
- *     responses:
- *       200:
- *         description: Authentification réussie
- *       401:
- *         description: Échec de l'authentification.
- */
-router.post('/login', login);
-
-/**
- * @swagger
- * /api/v1/users/logout:
- *   post:
- *     tags:
- *       - Auth
- *     summary: Déconnexion de l'utilisateur.
- *     description: Cette route permet à un utilisateur de se déconnecter.
- *     responses:
- *       200:
- *         description: Déconnexion réussie.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "You are logged out successfully"
- *       400:
- *         description: Erreur lors de la déconnexion.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Error message"
- *       500:
- *         description: Erreur serveur.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Internal server error"
- */
-router.post('/logout', authenticateUser, logout);
-
-/**
- * @swagger
- * /forgot-password:
- *   post:
- *     summary: Send a password reset email to the user.
- *     tags:
- *       - Auth
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 example: user@example.com
- *                 description: The email address of the user requesting a password reset.
- *     responses:
- *       200:
- *         description: Password reset email sent successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Password reset email sent successfully.
- *       400:
- *         description: Bad request (e.g., missing email or invalid email).
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: Email is required.
- *       500:
- *         description: Internal server error.
- */
-router.post('/forgot-password', forgotPassword);
-
-/**
- * @swagger
- * /reset-password:
- *   post:
- *     summary: Verify OTP and reset the user's password.
- *     tags:
- *       - Auth
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               access_token:
- *                 type: string
- *                 example: token_from_email
- *                 description: The token sent to the user's email for password reset.
- *               new_password:
- *                 type: string
- *                 example: new_secure_password
- *                 description: The new password to set for the user.
- *     responses:
- *       200:
- *         description: Password reset successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Password reset successfully.
- *       400:
- *         description: Bad request (e.g., missing token or password).
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: Access token and new password are required.
- *       500:
- *         description: Internal server error.
- */
-router.post('/reset-password',resetPassword)
 
 router.use(authenticateUser);
 
 /**
  * @swagger
- * /api/v1/users/:
+ * /users/:
  *   post:
  *     tags:
  *       - Users
@@ -264,7 +57,7 @@ router.post('/', checkPermission('createUser'), createUser);
 
 /**
  * @swagger
- * /api/v1/users/:
+ * /users/:
  *   get:
  *     tags:
  *       - Users
@@ -278,7 +71,7 @@ router.get('/', checkPermission('getAllUsers'), getAllUsers);
 
 /**
  * @swagger
- * /api/v1/users/{id}:
+ * /users/{id}:
  *   get:
  *     tags:
  *       - Users
@@ -301,7 +94,7 @@ router.get('/:id', checkPermission('getUserById'), getUserById);
 
 /**
  * @swagger
- * /api/v1/users/{id}:
+ * /users/{id}:
  *   put:
  *     tags:
  *       - Users
@@ -355,7 +148,7 @@ router.put('/:id',checkPermission(updateUser), updateUser);
 
 /**
  * @swagger
- * /api/v1/users/{id}:
+ * /users/{id}:
  *   delete:
  *     tags:
  *       - Users
@@ -378,7 +171,7 @@ router.delete('/:id', checkPermission('deleteUser'), deleteUser);
 
 /**
  * @swagger
- * /api/v1/users/activeDesactiveUser/{id}:
+ * /users/activeDesactiveUser/{id}:
  *   patch:
  *     tags:
  *       - Users
@@ -403,7 +196,7 @@ router.patch('/activeDesactiveUser/:id', checkPermission('activeDesactiveUser'),
 
 /**
  * @swagger
- * /api/v1/users/assignPackageToUsers:
+ * /users/assignPackageToUsers:
  *   post:
  *     tags:
  *       - Users
@@ -432,7 +225,81 @@ router.post('/assignPackageToUsers', checkPermission('assignPackageToUsers'), as
 
 /**
  * @swagger
- * /api/v1/users/assignworkspacetouser:
+ * /users/assign-domaine:
+ *   post:
+ *     tags:
+ *       - Users
+ *     summary: Assigner un domaine à des utilisateurs.
+ *     description: Cette route permet d'assigner un domaine spécifique à un ou plusieurs utilisateurs. Nécessite un rôle approprié.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               domaineId:
+ *                 type: string
+ *                 example: "domaine_id"
+ *                 description: L'ID du domaine à assigner.
+ *               usersId:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["user_id_1", "user_id_2"]
+ *                 description: Liste des IDs des utilisateurs à qui le domaine sera assigné.
+ *     responses:
+ *       200:
+ *         description: Domaine assigné aux utilisateurs avec succès.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Domaines assignment completed successfully."
+ *                 updatedUsers:
+ *                   type: array
+ *                   description: Liste des utilisateurs mis à jour.
+ *                   items:
+ *                     type: object
+ *       400:
+ *         description: Requête invalide (données manquantes ou incorrectes).
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "domaineId and an array of usersId are required."
+ *       404:
+ *         description: Domaine non trouvé.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Domaine not found."
+ *       500:
+ *         description: Erreur interne du serveur.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Internal server error."
+ */
+router.post('/assign-domaine', checkPermission('assignDomaineToUsers'), assignDomaineToUsers);
+
+/**
+ * @swagger
+ * /users/assignworkspacetouser:
  *   post:
  *     tags:
  *       - Users
@@ -461,7 +328,7 @@ router.post('/assignworkspacetouser', checkPermission('assignWorkspaceToUsers'),
 
 /**
  * @swagger
- * /api/v1/users/assignRole:
+ * /users/assignRole:
  *   post:
  *     tags:
  *       - Users

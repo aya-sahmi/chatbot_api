@@ -1,7 +1,6 @@
 import express from 'express';
 import {getAllRoles,createRole,getAllPermissions,createPermission,assignPermissionsToRole, getPermissionsByRole,} from '../controllers/roleController.js';
 import { authenticateUser } from '../middlewares/verifyToken.js';
-import { checkRole } from '../middlewares/checkRole.js';
 import { checkPermission } from '../middlewares/checkPermission.js';
 
 const router = express.Router();
@@ -19,7 +18,7 @@ router.use(authenticateUser);
 
 /**
  * @swagger
- * /api/v1/roles:
+ * /roles:
  *   get:
  *     tags:
  *       - Roles
@@ -46,7 +45,7 @@ router.get('/', checkPermission('getAllRoles') , getAllRoles);
 
 /**
  * @swagger
- * /api/v1/roles:
+ * /roles:
  *   post:
  *     tags:
  *       - Roles
@@ -81,7 +80,7 @@ router.post('/', checkPermission('createRole') ,createRole);
 
 /**
  * @swagger
- * /api/v1/permissions:
+ * /permissions:
  *   get:
  *     tags:
  *       - Permissions
@@ -108,7 +107,7 @@ router.get('/permissions', checkPermission('getAllPermissions'), getAllPermissio
 
 /**
  * @swagger
- * /api/v1/permissions:
+ * /permissions:
  *   post:
  *     tags:
  *       - Permissions
@@ -143,7 +142,7 @@ router.post('/permissions', checkPermission('createPermission') ,createPermissio
 
 /**
  * @swagger
- * /api/v1/roles/assignPermissions:
+ * /roles/assignPermissions:
  *   post:
  *     tags:
  *       - Roles
@@ -191,7 +190,7 @@ router.post('/assignPermissions' , checkPermission('assignPermissionsToRole') , 
 
 /**
  * @swagger
- * /api/v1/roles/permissions/{id}:
+ * /roles/permissions/{id}:
  *   get:
  *     tags:
  *       - Roles

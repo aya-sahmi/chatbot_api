@@ -4,85 +4,15 @@ import express, { json } from 'express';
 const app = express()
 app.use(json());
 
-const signUp = async (req, res) => {
-    const { email, password ,full_name , solde_total , role} = req.body;
-    const { data, error } = await supabase.auth.signUp({
-        email,password,
-    });
-    const user = await supabase.from('users').insert({ user_id: data.user.id , full_name ,domaine_id : null, package_id :null,solde_total , role  }).select('*');
-    if (error){
-        return res.status(400).json({ error: error.message });
-    }
-    res.status(201).json({ data });
-};
-const login = async (req, res) => {
-    const { email, password} = req.body;
-    const { data, error } = await supabase.auth.signInWithPassword({
-        email,password
-    });
-    const user = data.user.id;
-    const { data: userStatut , error: errStatut} = await supabase.from('users').select('is_active').eq('user_id', user).single();
-    if(userStatut.is_active === false){
-        return res.status(400).json({error: "User is desactivated"})
-    }
-    if (error){
-        return res.status(400).json({ error: error.message });
-    }
-    res.status(200).json({ data });
-};
-
-const logout = async(req, res) => {
-    try {
-        const {error} = await supabase.auth.signOut();
-        if(error){
-            return res.status(400).json({error:error.message})
-        }
-        res.status(200).json({message: "You are logged out successfully"});
-    } catch (error) {
-        res.status(500).json({error:error.message})
-    }
-}
-
-const forgotPassword = async(req,res)=>{
-    try {
-        const {email} = req.body;
-        const {data , error} = await supabase.auth.resetPasswordForEmail(email,{
-            redirectTo:'http://localhost:5000/reset-password'
-        })
-        if(error){
-            return res.status(400).json({error:error.message})
-        }
-        res.status(200).json({message:"Password reset email sent successfully."})
-    } catch (error) {
-        res.status(500).json({error:error.message})
-    }
-}
-
-const resetPassword = async(req,res)=>{
-    try {
-        const {password} = req.body;
-        const {data , error} = await supabase.auth.updateUser({
-            password:password
-        })
-        if(error){
-            res.status(400).json({error:error.message})
-        }
-        res.status(200).json({message: "Password reset successfully.You can now log in with your new password."})
-    } catch (error) {
-        res.status(500).json({error:error.message})
-    }
-}
-
 const createUser = async (req, res) => {
     const {data , error } = await supabase.auth.signUp({
         email: req.body.email,
         password: req.body.password,
     });
     const user = data.user.id;
-    console.log(user)
     try {
-        const { full_name, age, domaine_id, package_id, solde_total , role } = req.body;
-        const { data :dataUser, error:errorUser } = await supabase.from('users').insert([{ user_id: user, full_name, age, domaine_id, package_id, solde_total , role , is_deleted:false , is_active:true}]).select('*');
+        const { full_name, age, domaine_id, package_id, solde_total , role_id } = req.body;
+        const { data :dataUser, error:errorUser } = await supabase.from('users').insert([{ user_id: user, full_name, age, domaine_id, package_id, solde_total , role_id , is_deleted:false , is_active:true}]).select('*');
         if(errorUser){
             return res.status(400).json({ error: errorUser.message });
         }
@@ -270,4 +200,4 @@ const assignRoleToUsers = async (req, res) => {
     }
 }
 
-export {signUp , login , logout ,createUser, getAllUsers, getUserById, updateUser, deleteUser , assignPackageToUsers , assignDomaineToUsers , assignWorkspaceToUsers,activeDesactiveUser , assignRoleToUsers , forgotPassword , resetPassword};
+export {createUser, getAllUsers, getUserById, updateUser, deleteUser , assignPackageToUsers , assignDomaineToUsers , assignWorkspaceToUsers,activeDesactiveUser , assignRoleToUsers};

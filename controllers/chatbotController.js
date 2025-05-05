@@ -59,15 +59,43 @@ const updateChatbot = async (req,res) =>{
 const deleteChatbot = async (req, res) => {
     try {
         const id = req.params.id;
-        const {data , error} = await supabase.from("chatbots").delete().eq("chatbot_id",id);
+        const {data , error} = await supabase.from("chatbots").update({is_deleted:true}).eq("chatbot_id",id).select('*');
         if(error){
             return res.status(400).json({error: error.message})
         }
-        res.json(data);
+        res.json({
+            message: "Chatbot marked as deleted successfully.",
+            data
+        });
     } catch (error) {
         res.status(500).json({error: error.message})
     }
 }
+
+const activeDesactiveChatbot = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const { data, error } = await supabase.from('chatbots').select('is_active').eq('chatbot_id', id).single();
+        if (error) {
+            return res.status(400).json({ error: error.message });
+        }
+        if (data.is_active === true) {
+            const { data: updateActivation, error: err } = await supabase.from('chatbots').update({ is_active: false }).eq('chatbot_id', id).select('*');
+            if (err) {
+                return res.status(400).json({ error: err.message });
+            }
+            res.status(200).json({message: 'Chatbot was deactivated successfully',updateActivation});
+        } else {
+            const { data: updateActivation, error: err } = await supabase.from('chatbots').update({ is_active: true }).eq('chatbot_id', id).select('*');
+            if (err) {
+                return res.status(400).json({ error: err.message });
+            }
+            res.status(200).json({message: 'Chatbot was activated successfully',updateActivation});
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 const assignChatbotToWorkspace = async (req, res) => {
     try {
@@ -81,4 +109,4 @@ const assignChatbotToWorkspace = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 }
-export { createChatbot , getAllChatbots , getChatbotById , updateChatbot , deleteChatbot , assignChatbotToWorkspace };
+export { createChatbot , getAllChatbots , getChatbotById , updateChatbot , deleteChatbot , activeDesactiveChatbot , assignChatbotToWorkspace };

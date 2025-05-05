@@ -1,6 +1,5 @@
 import { Router } from 'express';
-import {createPackage,getAllPackages,getPackageById,updatePackage,deletePackage} from '../controllers/packageController.js';
-import { checkRole } from '../middlewares/checkRole.js';
+import {createPackage,getAllPackages,getPackageById,updatePackage,deletePackage, assignPackageToDomaine, unassignDomaineFromPackage, activeDesactivePackage, getDomainsByPackageId} from '../controllers/packageController.js';
 import { authenticateUser } from '../middlewares/verifyToken.js';
 import { checkPermission } from '../middlewares/checkPermission.js';
 
@@ -17,7 +16,7 @@ router.use(authenticateUser);
 
 /**
  * @swagger
- * /api/v1/packages/:
+ * /packages/:
  *   post:
  *     tags:
  *       - Packages
@@ -58,7 +57,7 @@ router.post('/',checkPermission('createPackage'), createPackage);
 
 /**
  * @swagger
- * /api/v1/packages/:
+ * /packages/:
  *   get:
  *     tags:
  *       - Packages
@@ -72,7 +71,7 @@ router.get('/',checkPermission('getAllPackages'), getAllPackages);
 
 /**
  * @swagger
- * /api/v1/packages/{id}:
+ * /packages/{id}:
  *   get:
  *     tags:
  *       - Packages
@@ -95,7 +94,7 @@ router.get('/:id', checkPermission('getPackageById'), getPackageById);
 
 /**
  * @swagger
- * /api/v1/packages/{id}:
+ * /packages/{id}:
  *   put:
  *     tags:
  *       - Packages
@@ -143,7 +142,7 @@ router.put('/:id',checkPermission('updatePackage'), updatePackage);
 
 /**
  * @swagger
- * /api/v1/packages/{id}:
+ * /packages/{id}:
  *   delete:
  *     tags:
  *       - Packages
@@ -163,5 +162,356 @@ router.put('/:id',checkPermission('updatePackage'), updatePackage);
  *         description: package non trouvé.
  */
 router.delete('/:id',checkPermission('deletePackage'), deletePackage);
+
+/**
+ * @swagger
+ * /packages/active-desactive/{id}:
+ *   patch:
+ *     tags:
+ *       - Packages
+ *     summary: Activer ou désactiver un package.
+ *     description: Cette route permet de basculer le statut `is_active` d'un package entre `true` et `false`. Nécessite un rôle approprié.
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: L'ID du package à activer ou désactiver.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Statut du package mis à jour avec succès.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Package was activated successfully."
+ *                 updateActivation:
+ *                   type: object
+ *                   description: Les détails du package mis à jour.
+ *       400:
+ *         description: Requête invalide.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Invalid request."
+ *       404:
+ *         description: Package non trouvé.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Package not found."
+ *       500:
+ *         description: Erreur interne du serveur.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Internal server error."
+ */
+router.patch('/active-desactive/:id', checkPermission('activeDesactivePackage'), activeDesactivePackage);
+
+/**
+ * @swagger
+ * /packages/assign-domaine-to-package:
+ *   post:
+ *     tags:
+ *       - Packages
+ *     summary: Assigner un domaine à un package.
+ *     description: Cette route permet d'assigner un domaine spécifique à un package. Nécessite un rôle approprié.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               domaineId:
+ *                 type: string
+ *                 example: "domaine_id"
+ *                 description: L'ID du domaine à assigner.
+ *               packageId:
+ *                 type: string
+ *                 example: "package_id"
+ *                 description: L'ID du package auquel le domaine sera assigné.
+ *     responses:
+ *       200:
+ *         description: Domaine assigné au package avec succès.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Domaine assigned to package successfully."
+ *                 updatedDomaine:
+ *                   type: object
+ *                   description: Les détails du domaine mis à jour.
+ *       400:
+ *         description: Requête invalide (données manquantes ou incorrectes).
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "domaineId and packageId are required."
+ *       404:
+ *         description: Domaine ou package non trouvé.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Domaine not found."
+ *       500:
+ *         description: Erreur interne du serveur.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Internal server error."
+ */
+router.post('/assign-package-to-domaine', checkPermission('assignPackageToDomaine'), assignPackageToDomaine);
+
+/**
+ * @swagger
+ * /packages/assign-domaine-to-package:
+ *   post:
+ *     tags:
+ *       - Packages
+ *     summary: Assigner un domaine à un package.
+ *     description: Cette route permet d'assigner un domaine spécifique à un package. Nécessite un rôle approprié.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               domaineId:
+ *                 type: string
+ *                 example: "domaine_id"
+ *                 description: L'ID du domaine à assigner.
+ *               packageId:
+ *                 type: string
+ *                 example: "package_id"
+ *                 description: L'ID du package auquel le domaine sera assigné.
+ *     responses:
+ *       200:
+ *         description: Domaine assigné au package avec succès.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Domaine assigned to package successfully."
+ *                 updatedDomaine:
+ *                   type: object
+ *                   description: Les détails du domaine mis à jour.
+ *       400:
+ *         description: Requête invalide (données manquantes ou incorrectes).
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "domaineId and packageId are required."
+ *       404:
+ *         description: Domaine ou package non trouvé.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Domaine not found."
+ *       500:
+ *         description: Erreur interne du serveur.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Internal server error."
+ */
+router.post('/assign-domaine-to-package', checkPermission('assignPackageToDomaine'), assignPackageToDomaine);
+
+/**
+ * @swagger
+ * /packages/unassign-domaine-from-package:
+ *   post:
+ *     tags:
+ *       - Packages
+ *     summary: Désassigner un domaine d'un package.
+ *     description: Cette route permet de désassigner un domaine d'un package. Nécessite un rôle approprié.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               domaineId:
+ *                 type: string
+ *                 example: "domaine_id"
+ *                 description: L'ID du domaine à désassigner.
+ *     responses:
+ *       200:
+ *         description: Domaine désassigné du package avec succès.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Domaine unassigned from package successfully."
+ *                 updatedDomaine:
+ *                   type: object
+ *                   description: Les détails du domaine mis à jour.
+ *       400:
+ *         description: Requête invalide (données manquantes ou domaine déjà désassigné).
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Domaine is not assigned to any package."
+ *       404:
+ *         description: Domaine non trouvé.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Domaine not found."
+ *       500:
+ *         description: Erreur interne du serveur.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Internal server error."
+ */
+router.post('/unassign-domaine-from-package', checkPermission('unassignDomaineFromPackage'), unassignDomaineFromPackage);
+
+/**
+ * @swagger
+ * /packages/{id}/domains:
+ *   get:
+ *     tags:
+ *       - Packages
+ *     summary: Récupérer les domaines associés à un package.
+ *     description: Cette route permet de récupérer les détails d'un package spécifique et les domaines qui lui sont assignés. Nécessite un rôle approprié.
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: L'ID du package pour lequel récupérer les domaines.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Détails du package et domaines associés récupérés avec succès.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Package details and their domains."
+ *                 package:
+ *                   type: object
+ *                   description: Les détails du package.
+ *                   properties:
+ *                     package_id:
+ *                       type: string
+ *                       example: "123"
+ *                     package_name:
+ *                       type: string
+ *                       example: "Example Package"
+ *                     package_description:
+ *                       type: string
+ *                       example: "Description of the package"
+ *                     solde_total:
+ *                       type: number
+ *                       example: 500
+ *                 domaines:
+ *                   type: array
+ *                   description: Liste des domaines associés au package.
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       domaine_id:
+ *                         type: string
+ *                         example: "101"
+ *                       domaine_name:
+ *                         type: string
+ *                         example: "Domaine 1"
+ *                       domaine_description:
+ *                         type: string
+ *                         example: "Description of Domaine 1"
+ *                       solde_total:
+ *                         type: number
+ *                         example: 100
+ *       404:
+ *         description: Package non trouvé.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Package not found."
+ *       500:
+ *         description: Erreur interne du serveur.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Internal server error."
+ */
+router.get('/:id/domains', checkPermission('getDomainsByPackageId'), getDomainsByPackageId);
 
 export default router;
