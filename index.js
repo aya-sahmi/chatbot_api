@@ -10,7 +10,13 @@ import { swaggerDocs, swaggerUi } from './config/swagger.js';
 import cors from 'cors';
 
 const app = express();
-app.use(cors());
+const corsOptions = {
+    origin: 'https://chatbotapi-production-319b.up.railway.app/docs/',
+    methods: ['GET', 'POST', 'PUT', 'PATCH' ,'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  };
+app.use(cors(corsOptions));
 app.use(express.json());
 const PORT = process.env.PORT ;
 
