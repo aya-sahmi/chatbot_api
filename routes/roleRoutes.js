@@ -224,6 +224,6 @@ router.post('/assignPermissions' , checkPermission('assignPermissionsToRole') , 
  *       500:
  *         description: Erreur serveur.
  */
-router.get('/permissions/:id', checkPermission(getPermissionsByRole), getPermissionsByRole);
+router.get('/permissions/:id', checkPermission('getPermissionsByRole'), getPermissionsByRole);
 
 export default router;
