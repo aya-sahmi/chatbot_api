@@ -22,25 +22,33 @@ const signUp = async (req, res) => {
 const login = async (req, res) => {
     const { email, password } = req.body;
     const { data: loginData, error: errLogin } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email,password,
     });
+    const emailUser = loginData.user.email;
     if (errLogin) {
         return res.status(400).json({ error: errLogin.message });
     }
     const userID = loginData.user.id;
     const access_token = loginData.session.access_token;
-    const { data: userData, error: errUser } = await supabase.from('users').select('*').eq('user_id', userID).single();
+    const { data: userData, error: errUser } = await supabase.from('users').select('user_id, full_name, age, domaine_id, package_id, solde_total, is_deleted, is_active, role_id, roles(role_name)').eq('user_id', userID).single();
     if (errUser) {
         return res.status(400).json({ error: errUser.message });
     }
     if (userData.is_active === false) {
         return res.status(400).json({ error: "User is deactivated" });
     }
+
     if (userData.is_deleted === true) {
         return res.status(400).json({ error: "User is deleted" });
     }
-    res.status(200).json({ access_token, userData });
+    const { roles, ...rest } = userData;
+    const userAuth = {...rest, email : emailUser ,role: roles.role_name,
+    };
+
+    return res.status(200).json({
+        access_token,
+        userData: userAuth,
+    });
 };
 
 const logout = async (req, res) => {

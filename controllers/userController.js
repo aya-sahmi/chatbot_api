@@ -24,17 +24,29 @@ const createUser = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
     try {
-        const { data, error } = await supabase.from('users').select('*');
+        const { data, error } = await supabase.from('users').select(`*,domaine_id (domaine_name),package_id (package_name),role_id (role_name)`);;
         if(error){
             return res.status(400).json({ error: error.message });
         }
-        res.json(data);
+        const users = data.map(user => ({
+            user_id: user.user_id,
+            full_name: user.full_name,
+            age: user.age,
+            solde_total: user.solde_total,
+            is_deleted: user.is_deleted,
+            is_active: user.is_active,
+            domaine_name: user.domaine_id?.domaine_name || null,
+            package_name: user.package_id?.package_name || null,
+            email: user.email,
+            role_name: user.role_id?.role_name || null
+        }));
+        res.json(users);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
-const getUserById = async (req,res) =>{
+const getUserById = async (req , res) =>{
     try {
         const id  = req.params.id;
         const {data , error} = await supabase.from("users").select("*").eq("user_id",id);
@@ -64,17 +76,21 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
     try {
         const id = req.params.id;
-        const { data, error } = await supabase.from('users').update({ is_deleted: true }).eq('user_id', id).select('*');
+        const { data: user, error: err } = await supabase.from('users').select('is_deleted').eq('user_id', id).single();
+        const newStatus = !user.is_deleted;
+        const { data, error } = await supabase.from('users').update({ is_deleted: newStatus }).eq('user_id', id).select('*');
         if (error) {
             return res.status(400).json({ error: error.message });
         }
-        res.status(200).json({message: "User was deleted successfully",
-            data
+        res.status(200).json({
+            message: `Statut modifié avec succès`,
+            data,
         });
-    } catch (error) {
+        } catch (error) {
         res.status(500).json({ error: error.message });
-    }
+        }
 };
+
 
 const activeDesactiveUser = async (req,res) => {
     try {
