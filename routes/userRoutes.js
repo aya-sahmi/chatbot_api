@@ -144,7 +144,7 @@ router.get('/:id', checkPermission('getUserById'), getUserById);
  *       404:
  *         description: Utilisateur non trouvé.
  */
-router.put('/:id',checkPermission(updateUser), updateUser);
+router.put('/:id',checkPermission('updateUser'), updateUser);
 
 /**
  * @swagger

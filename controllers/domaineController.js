@@ -11,9 +11,6 @@ const createDomaine = async (req, res) => {
         if(error){
             return res.status(400).json({error : error.message});
         }
-        console.log(req.body);
-        console.log('----------------');
-        console.log(data);
         res.status(200).json(data);
     }catch(error){
         return res.status(500).json({error : error.message});
@@ -60,18 +57,22 @@ const updateDomaine = async (req, res) => {
 const deleteDomaine = async (req, res) => {
     try {
         const id = req.params.id;
-        const {data , error} = await supabase.from("domaines").update({is_deleted:true}).eq("domaine_id",id).select('*');
-        if(error){
-            return res.status(400).json({error: error.message})
+        const { data: domaine, error: err } = await supabase.from("domaines").select("is_deleted").eq("domaine_id", id).single();
+        const isDeleted = !domaine.is_deleted;
+        const { data, error } = await supabase
+            .from("domaines").update({ is_deleted: isDeleted }).eq("domaine_id", id).select("*");
+
+        if (error) {
+            return res.status(400).json({ error: error.message });
         }
         res.json({
-            message: "Domaine marked as deleted successfully",
-            data
+            message: `Domaine ${isDeleted ? "marked as deleted" : "restored"} successfully`,
+            data,
         });
     } catch (error) {
-        res.status(500).json({error: error.message})
+        res.status(500).json({ error: error.message });
     }
-}
+};
 
 const activeDesactiveDomaine = async (req, res) => {
     try {
@@ -100,27 +101,41 @@ const activeDesactiveDomaine = async (req, res) => {
 
 const assignSoldeToWorkspaces = async (req, res) => {
     try {
-        const {domaine_id,tokens}= req.body;
-        const{ data : domaine , error: dmnErr} = await supabase.from('domaines').select('solde_total').eq('domaine_id',domaine_id)
-        if(dmnErr){
-            return res.status(400).json({error: dmnErr.message})
+        const { domaine_id, tokens, workspaceIds } = req.body;
+        if (!domaine_id || !tokens || !workspaceIds || workspaceIds.length === 0) {
+            return res.status(400).json({ error: "Données invalides. Veuillez fournir domaine_id, solde et workspaceIds." });
         }
-        if(domaine[0].solde_total < tokens ){
-            return res.status(400).json({error: "Solde insuffisant"})
+        const { data: domaine, error: dmnErr } = await supabase.from('domaines').select('solde_total').eq('domaine_id', domaine_id).single();
+
+        if (dmnErr || !domaine) {
+            return res.status(404).json({ error: "Domaine introuvable." });
         }
-        domaine[0].solde_total -= tokens;
-        const {data , error: dmnUpdateErr} = await supabase.from('domaines').update({solde_total: domaine[0].solde_total}).eq('domaine_id',domaine_id).select('*');
-        if(dmnUpdateErr){
-            return res.status(400).json({error: dmnUpdateErr.message})
+        if (domaine.solde_total < tokens) {
+            return res.status(400).json({ error: "Solde insuffisant." });
         }
-        const {data : workspacesUpdate , error: wsUpdateErr} = await supabase.from('workspaces').update({solde_total: tokens}).in('workspace_id', workspaceIds).select('*');
-        if(wsUpdateErr){
-            return res.status(400).json({error: wsUpdateErr.message})
+        const newSolde = domaine.solde_total - tokens;
+        const { error: dmnUpdateErr } = await supabase
+            .from('domaines')
+            .update({ solde_total: newSolde })
+            .eq('domaine_id', domaine_id);
+
+        if (dmnUpdateErr) {
+            return res.status(500).json({ error: "Erreur lors de la mise à jour du solde du domaine." });
         }
-        res.status(200).json(data);
+        const { error: wsUpdateErr } = await supabase
+            .from('workspaces')
+            .update({ solde_total: tokens })
+            .in('workspace_id', workspaceIds);
+
+        if (wsUpdateErr) {
+            return res.status(500).json({ error: "Erreur lors de la mise à jour des workspaces." });
+        }
+
+        res.status(200).json({ message: "Solde attribué avec succès aux espaces de travail." });
     } catch (error) {
-        res.status(500).json({error: error.message})
+        console.error("Erreur dans assignSoldeToWorkspaces :", error);
+        res.status(500).json({ error: error.message });
     }
-}
+};
 
 export { createDomaine, getAllDomaines, getDomaineById, updateDomaine, deleteDomaine , activeDesactiveDomaine , assignSoldeToWorkspaces };
