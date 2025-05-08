@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import {signUp , login , logout , forgotPassword, resetPassword} from '../controllers/authController.js';
+import {signUp , login , forgotPassword, resetPassword} from '../controllers/authController.js';
 import { authenticateUser } from '../middlewares/verifyToken.js';
 
 const router = Router();
@@ -68,48 +68,6 @@ router.post('/signup', signUp);
  *         description: Échec de l'authentification.
  */
 router.post('/login', login);
-
-/**
- * @swagger
- * /auth/logout:
- *   post:
- *     tags:
- *       - Auth
- *     summary: Déconnexion de l'utilisateur.
- *     description: Cette route permet à un utilisateur de se déconnecter.
- *     responses:
- *       200:
- *         description: Déconnexion réussie.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "You are logged out successfully"
- *       400:
- *         description: Erreur lors de la déconnexion.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Error message"
- *       500:
- *         description: Erreur serveur.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Internal server error"
- */
-router.post('/logout', authenticateUser, logout);
 
 /**
  * @swagger
