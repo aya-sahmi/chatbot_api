@@ -61,13 +61,18 @@ const updatePackage= async (req,res) =>{
 const deletePackage = async (req, res)=>{
     try {
         const id  = req.params.id
-        const {data , error } = await supabase.from('packages').update({is_deleted:true}).eq('package_id',id).select('*');
-        if(error){
-            return res.status(400).json({error: error.message})
+        const { data: packageData, error: err } = await supabase.from("packages").select("is_deleted").eq("package_id", id).single();
+        if (err) {
+            return res.status(400).json({ error: err.message });
         }
-        res.json({
-            message : "Package marked as deleted successfully",
-            data
+        const isDeleted = !packageData.is_deleted;
+        const { data, error } = await supabase.from("packages").update({ is_deleted: isDeleted }).eq("package_id", id).select("*");
+        if (error) {
+            return res.status(400).json({ error: error.message });
+        }
+        res.status(201).json({
+            message: `Package ${isDeleted ? 'marked as deleted' : 'restored'} successfully`,
+            data,
         });
     } catch (error) {
         res.status(500).json({error: error.message})

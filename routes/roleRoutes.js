@@ -1,5 +1,5 @@
 import express from 'express';
-import {getAllRoles,createRole,getAllPermissions,createPermission,assignPermissionsToRole, getPermissionsByRole,} from '../controllers/roleController.js';
+import {getAllRoles,createRole,getAllPermissions,createPermission,assignPermissionsToRole, getPermissionsByRole, unAssignPermissionToRole, deletePermission, deleteRole,} from '../controllers/roleController.js';
 import { authenticateUser } from '../middlewares/verifyToken.js';
 import { checkPermission } from '../middlewares/checkPermission.js';
 
@@ -80,6 +80,43 @@ router.post('/', checkPermission('createRole') ,createRole);
 
 /**
  * @swagger
+ * /roles/{id}:
+ *   delete:
+ *     tags:
+ *       - Roles
+ *     summary: Supprime ou restaure un rôle
+ *     description: Bascule le champ `is_deleted` d'un rôle entre `true` et `false`.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID du rôle à supprimer ou restaurer.
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Succès de la suppression ou restauration du rôle.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       400:
+ *         description: Erreur de requête.
+ *       500:
+ *         description: Erreur interne du serveur.
+ */
+router.delete("/:id", deleteRole);
+
+
+/**
+ * @swagger
  * /permissions:
  *   get:
  *     tags:
@@ -139,6 +176,43 @@ router.get('/permissions', checkPermission('getAllPermissions'), getAllPermissio
  *                   example: "createUser"
  */
 router.post('/permissions', checkPermission('createPermission') ,createPermission);
+
+/**
+ * @swagger
+ * /permissions/{id}:
+ *   delete:
+ *     tags:
+ *       - Permissions
+ *     summary: Supprime ou restaure une permission
+ *     description: Bascule le champ `is_deleted` d'une permission entre `true` et `false`.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID de la permission à supprimer ou restaurer.
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Succès de la suppression ou restauration de la permission.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       400:
+ *         description: Erreur de requête.
+ *       500:
+ *         description: Erreur interne du serveur.
+ */
+router.delete("/permissions/:id", deletePermission);
+
 
 /**
  * @swagger
@@ -225,5 +299,47 @@ router.post('/assignPermissions' , checkPermission('assignPermissionsToRole') , 
  *         description: Erreur serveur.
  */
 router.get('/permissions/:id', checkPermission('getPermissionsByRole'), getPermissionsByRole);
+
+/**
+ * @swagger
+ * /roles/unassign-permission:
+ *   post:
+ *     tags:
+ *       - Roles
+ *     summary: Désassigne une permission d'un rôle
+ *     description: Supprime l'association entre un rôle et une permission.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               roleId:
+ *                 type: integer
+ *                 description: ID du rôle.
+ *               permissionId:
+ *                 type: integer
+ *                 description: ID de la permission.
+ *     responses:
+ *       200:
+ *         description: Succès de la désassignation de la permission.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       400:
+ *         description: Erreur de requête.
+ *       500:
+ *         description: Erreur interne du serveur.
+ */
+router.post("/unassign-permission", unAssignPermissionToRole);
 
 export default router;

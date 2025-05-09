@@ -26,6 +26,29 @@ export const createRole = async(req,res)=>{
     }
 }
 
+export const deleteRole = async (req, res) => {
+    try {
+        const roleId = req.params.id;
+        const { data: role, error: err } = await supabase.from('roles').select('is_deleted').eq('role_id', roleId).single();
+
+        if (err) {
+            return res.status(400).json({ error: err.message });
+        }
+        const isDeleted = !role.is_deleted;
+        const { data, error: deleteErr } = await supabase.from('roles').update({ is_deleted: isDeleted }).eq('role_id', roleId).select('*');
+
+        if (deleteErr) {
+            return res.status(400).json({ error: deleteErr.message });
+        }
+        res.status(200).json({
+            message: `Role ${isDeleted ? 'marked as deleted' : 'restored'} successfully`,
+            data,
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 export const getAllPermissions = async(req,res)=>{
     try {
         const {data, error} = await supabase.from('permissions').select('*');
@@ -49,6 +72,30 @@ export const createPermission = async(req,res)=>{
         res.status(500).json({error : error.message});
     }
 }
+
+export const deletePermission = async (req, res) => {
+    try {
+        const permissionId = req.params.id;
+        const { data: permission, error: err } = await supabase.from('permissions').select('is_deleted').eq('permission_id', permissionId).single();
+
+        if (err) {
+            return res.status(400).json({ error: err.message });
+        }
+        const isDeleted = !permission.is_deleted;
+        const { data, error: deleteErr } = await supabase.from('permissions').update({ is_deleted: isDeleted }).eq('permission_id', permissionId).select('*');
+
+        if (deleteErr) {
+            return res.status(400).json({ error: deleteErr.message });
+        }
+
+        res.status(200).json({
+            message: `Permission ${isDeleted ? 'marked as deleted' : 'restored'} successfully`,
+            data,
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 export const assignPermissionsToRole = async (req, res) => {
     try {
@@ -91,3 +138,20 @@ export const getPermissionsByRole = async(req,res)=>{
         res.status(500).json({error : error.message})
     }
 }
+
+export const unAssignPermissionToRole = async (req, res) => {
+    try {
+        const { roleId, permissionId } = req.body;
+        const { data, error } = await supabase.from('role_permissions').delete().eq('role_id', roleId).eq('permission_id', permissionId);
+
+        if (error) {
+            return res.status(400).json({ error: error.message });
+        }
+        res.status(200).json({
+            message: 'Permission unassigned from role successfully',
+            data,
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};

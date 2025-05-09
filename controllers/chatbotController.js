@@ -59,18 +59,25 @@ const updateChatbot = async (req,res) =>{
 const deleteChatbot = async (req, res) => {
     try {
         const id = req.params.id;
-        const {data , error} = await supabase.from("chatbots").update({is_deleted:true}).eq("chatbot_id",id).select('*');
-        if(error){
-            return res.status(400).json({error: error.message})
+        const { data: chatbot, error: err } = await supabase.from("chatbots").select("is_deleted").eq("chatbot_id", id).single();
+        if (err) {
+            return res.status(400).json({ error: err.message });
         }
+        const isDeleted = !chatbot.is_deleted;
+        const { data, error: updateError } = await supabase.from("chatbots").update({ is_deleted: isDeleted }).eq("chatbot_id", id).select("*");
+
+        if (updateError) {
+            return res.status(400).json({ error: updateError.message });
+        }
+
         res.json({
-            message: "Chatbot marked as deleted successfully.",
-            data
+            message: `Chatbot ${isDeleted ? "marked as deleted" : "restored"} successfully`,
+            data,
         });
     } catch (error) {
-        res.status(500).json({error: error.message})
+        res.status(500).json({ error: error.message });
     }
-}
+};
 
 const activeDesactiveChatbot = async (req, res) => {
     try {
