@@ -24,10 +24,11 @@ const createUser = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
     try {
-        const { data, error } = await supabase.from('users').select(`*,domaine_id (domaine_name),package_id (package_name),role_id (role_name)`);;
-        if(error){
+        const { data, error } = await supabase.from('users').select(`*,domaine_id (domaine_name),package_id (package_name),role_id (role_name),users_workspaces(workspace_id, workspaces(workspace_name))`);
+        if (error) {
             return res.status(400).json({ error: error.message });
         }
+
         const users = data.map(user => ({
             user_id: user.user_id,
             full_name: user.full_name,
@@ -38,8 +39,10 @@ const getAllUsers = async (req, res) => {
             domaine_name: user.domaine_id?.domaine_name || null,
             package_name: user.package_id?.package_name || null,
             email: user.email,
-            role_name: user.role_id?.role_name || null
+            role_name: user.role_id?.role_name || null,
+            workspace_name:user.users_workspaces[0]?.workspaces?.workspace_name || null
         }));
+
         res.json(users);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -123,21 +126,15 @@ const assignPackageToUsers = async (req, res) => {
         }
         const results = [];
         for (const userId of usersId) {
-            const { data: exUser} = await supabase.from('users').select('id, package_id').eq('user_id', userId).single();
-            if (exUser && exUser.package_id) {
-                const { data: userUpdate, error: errUpdate } = await supabase.from('users').update({ package_id: packageId }).eq('user_id', userId);
-                if (errUpdate) {
-                    results.push({ userId, action: 'error', error: errUpdate.message });
-                } else {
-                    results.push({ userId, action: 'updated', data: userUpdate });
-                }
+            const { data: userUpdate, error: errUpdate } = await supabase
+                .from('users')
+                .update({ package_id: packageId })
+                .eq('user_id', userId)
+                .select();
+            if (errUpdate) {
+                results.push({ userId, action: 'error', error: errUpdate.message });
             } else {
-                const { data: user, error: errAdd } = await supabase.from('users').insert({ package_id: packageId }).eq('user_id', userId);
-                if (errAdd) {
-                    results.push({ userId, action: 'error', error: errAdd.message });
-                } else {
-                    results.push({ userId, action: 'inserted', data: user });
-                }
+                results.push({ userId, action: 'updated', data: userUpdate });
             }
         }
         res.status(200).json({
@@ -155,7 +152,7 @@ const assignDomaineToUsers = async (req, res) => {
         if (!domaineId || !Array.isArray(usersId) || usersId.length === 0) {
             return res.status(400).json({ error: "domaineId and an array of usersId are required." });
         }
-        const { data: domaine, error: domaineError } = await supabase.from('domaines').select('id').eq('id', domaineId).single();
+        const { data: domaine, error: domaineError } = await supabase.from('domaines').select('domaine_id').eq('domaine_id', domaineId).single();
         if (domaineError || !domaine) {
             return res.status(404).json({ error: "Domaine not found." });
         }

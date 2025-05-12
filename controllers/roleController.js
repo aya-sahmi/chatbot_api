@@ -119,25 +119,39 @@ export const assignPermissionsToRole = async (req, res) => {
     }
 };
 
-export const getPermissionsByRole = async(req,res)=>{
+export const getPermissionsByRole = async (req, res) => {
     try {
         const role_id = req.params.id;
-        const {data : roleData, error: roleErr} = await supabase.from('roles').select('*').eq('role_id', role_id).single();
-        if(roleErr){
-            return res.status(400).json({error : roleErr.message});
+
+        // Récupérer les données du rôle
+        const { data: roleData, error: roleErr } = await supabase.from('roles').select('*').eq('role_id', role_id).single();
+        if (roleErr) {
+            return res.status(400).json({ error: roleErr.message });
         }
-        const {data : permissionData, error: permissionErr} = await supabase.from('role_permissions').select('permissions(permission_name)').eq('role_id', role_id);
-        if(permissionErr){
-            return res.status(400).json({error : error.message});
+
+        // Récupérer les permissions associées à ce rôle avec leurs ID
+        const { data: permissionData, error: permissionErr } = await supabase
+            .from('role_permissions')
+            .select('permission_id, permissions(permission_name)')
+            .eq('role_id', role_id);
+
+        if (permissionErr) {
+            return res.status(400).json({ error: permissionErr.message });
         }
+
+        // Retourner le rôle et ses permissions avec leurs IDs
         res.status(200).json({
             role: roleData.role_name,
-            permissions: permissionData.map((permission) => permission.permissions.permission_name),
+            permissions: permissionData.map((permission) => ({
+                permission_id: permission.permission_id,
+                permission_name: permission.permissions.permission_name,
+            })),
         });
     } catch (error) {
-        res.status(500).json({error : error.message})
+        res.status(500).json({ error: error.message });
     }
-}
+};
+
 
 export const unAssignPermissionToRole = async (req, res) => {
     try {

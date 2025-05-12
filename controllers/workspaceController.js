@@ -67,13 +67,18 @@ const updateWorkspace = async (req, res) => {
 const deleteWorkspace = async (req, res) => {
     try {
         const id = req.params.id;
-        const {data , error} = await supabase.from("workspaces").update({is_deleted:true}).eq("workspace_id",id).select('*');
-        if(error){
-            return res.status(400).json({error: error.message})
+        const { data: workspaceData, error: err } = await supabase.from('workspaces').select('is_deleted').eq('workspace_id', id).single();
+        if (err) {
+            return res.status(400).json({ error: err.message });
         }
-        res.json({
-            message: "Workspace marked as deleted successfully",
-            data
+        const isDeleted = !workspaceData.is_deleted;
+        const { data, error } = await supabase.from('workspaces').update({ is_deleted: isDeleted }).eq('workspace_id', id).select('*');
+        if (error) {
+            return res.status(400).json({ error: error.message });
+        }
+        res.status(200).json({
+            message: `Workspace ${isDeleted ? 'marked as deleted' : 'restored'} successfully`,
+            data,
         });
     } catch (error) {
         res.status(500).json({error: error.message})

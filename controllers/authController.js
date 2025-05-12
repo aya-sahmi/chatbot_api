@@ -24,6 +24,10 @@ const login = async (req, res) => {
     const { data: loginData, error: errLogin } = await supabase.auth.signInWithPassword({
         email,password,
     });
+     if (errLogin || !loginData || !loginData.user || !loginData.session) {
+        return res.status(400).json({ error: errLogin ? errLogin.message : "Invalid login credentials" });
+    }
+
     const emailUser = loginData.user.email;
     if (errLogin) {
         return res.status(400).json({ error: errLogin.message });
